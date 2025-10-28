@@ -17,12 +17,15 @@ A powerful, Linux-optimized command-line tool for converting Android App Bundle 
 ## 📋 Requirements
 
 ### System Requirements
+
 - **OS**: Ubuntu/Debian-based Linux distribution
 - **Architecture**: x86_64 or ARM64
 - **Internet**: Required for bundletool download
 
 ### Automatic Dependencies
+
 The tool will automatically detect and install:
+
 - **Java Runtime Environment (JRE 8+)**
 - **curl** (for downloads)
 - **findutils** (file searching)
@@ -32,6 +35,7 @@ The tool will automatically detect and install:
 ## 🛠️ Installation
 
 ### Quick Start
+
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/apk_builder.git
@@ -45,6 +49,7 @@ chmod +x builder.sh
 ```
 
 ### Manual Setup
+
 ```bash
 # Download the script
 wget https://raw.githubusercontent.com/yourusername/apk_builder/main/builder.sh
@@ -104,6 +109,7 @@ chmod +x builder.sh
 ## 🎯 Command Reference
 
 ### Commands
+
 | Command | Description |
 |---------|-------------|
 | `convert` | Convert AAB files to APKs (default) |
@@ -112,6 +118,7 @@ chmod +x builder.sh
 | `help` | Display help message |
 
 ### Options
+
 | Option | Description | Default |
 |--------|-------------|---------|
 | `-h, --help` | Show help message | |
@@ -130,6 +137,7 @@ chmod +x builder.sh
 ## 🔄 Workflow Examples
 
 ### 1. First Time Setup
+
 ```bash
 # Initial run - will detect and install dependencies
 ./builder.sh
@@ -162,6 +170,7 @@ chmod +x builder.sh
 ```
 
 ### 2. Converting Multiple AAB Files
+
 ```bash
 # Place your .aab files in the directory
 ls *.aab
@@ -193,6 +202,7 @@ ls *.aab
 ```
 
 ### 3. Validation Mode
+
 ```bash
 ./builder.sh validate
 
@@ -216,18 +226,21 @@ ls *.aab
 ### Common Issues
 
 #### 1. Permission Denied
+
 ```bash
 chmod +x builder.sh
 ```
 
 #### 2. Java Not Found
+
 ```bash
 # The tool will automatically offer to install Java
 sudo apt update
-sudo apt install -y openjdk-11-jre
+sudo apt install -y openjdk-21-jre
 ```
 
 #### 3. Bundletool Download Failed
+
 ```bash
 # Check internet connection
 curl -I https://github.com/google/bundletool/releases/latest
@@ -237,10 +250,11 @@ wget https://github.com/google/bundletool/releases/download/1.18.2/bundletool-al
 ```
 
 #### 4. Keystore Issues
+
 ```bash
 # Generate a new keystore
 keytool -genkey -v -keystore my-release-key.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
-
+                                                                                    
 # Use custom keystore
 ./builder.sh --keystore my-release-key.keystore --alias my-key-alias --password yourpassword
 ```
@@ -256,7 +270,7 @@ keytool -genkey -v -keystore my-release-key.keystore -alias my-key-alias -keyalg
 
 ## 📁 File Structure
 
-```
+```bash
 apk_builder/
 ├── builder.sh           # Main script
 ├── README.md           # This documentation
@@ -268,12 +282,14 @@ apk_builder/
 ### Generated Files
 
 After conversion, you'll find:
+
 - `*.apks` - APK bundle files (can be installed directly)
 - `conversion.log` - Detailed conversion log (if logging enabled)
 
 ## 🔧 Configuration
 
 ### Environment Variables
+
 ```bash
 # Set custom output directory
 export APK_BUILDER_OUTPUT="./my_apks"
@@ -285,7 +301,9 @@ export APK_BUILDER_PASSWORD="mypass123"
 ```
 
 ### Default Keystore
+
 The tool includes a default keystore for testing:
+
 - **File**: `my-release-key.keystore`
 - **Alias**: `my-key-alias`
 - **Password**: `123456`
@@ -315,7 +333,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - 🐛 **Bug Reports**: [Create an Issue](https://github.com/yourusername/apk_builder/issues)
 - 💡 **Feature Requests**: [Create an Issue](https://github.com/yourusername/apk_builder/issues)
-- 📧 **Email**: your.email@example.com
+- 📧 **Email**: <bugiriwilson651@gmail.com>
 
 ## 🔗 Related Links
 
@@ -325,6 +343,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Created with ❤️ by Wilson Goal - 2025**
+## **Created with ❤️ by Wilson Goal - 2025**
 
 *If this tool helped you, consider giving it a ⭐ on GitHub!*
