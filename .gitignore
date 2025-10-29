@@ -1,1 +1,4 @@
 bundletool*
+*.aab
+*.keystore
+*.apks
