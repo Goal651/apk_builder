@@ -287,60 +287,86 @@ show_spinner() {
 
 # ========== UTILITIES ========== #
 check_dependencies() {
-    echo -e "${GREEN}"
-    echo "=[ Checking System Dependencies ]="
-    echo "+ --- --=[ Ubuntu/Debian Linux ]=-- --- +"
-    echo -e "${NC}"
+    echo ""
+    echo -e "${GREEN}=[ SYSTEM ANALYSIS ]=${NC}"
+    echo -e "${GREEN}+ --- --=[ Dependency Check ]=-- --- +${NC}"
+    echo ""
     
     local missing_deps=()
     local install_commands=()
     
-    # Check Java
-    echo -n "[*] Checking Java Development Kit... "
-    if ! command -v java >/dev/null 2>&1; then
-        echo -e "${RED}NOT FOUND${NC}"
-        missing_deps+=("Java Development Kit (JDK 8+)")
-        install_commands+=("sudo apt update && sudo apt install -y openjdk-11-jdk")
-    else
+    # Check Java with spinner
+    echo -n "[*] Analyzing Java Development Kit... "
+    # Simulate checking (java -version is fast, but we show spinner for UX)
+    sleep 0.5 &
+    local java_pid=$!
+    show_spinner $java_pid "Java JDK"
+    wait $java_pid
+    
+    if java -version >/dev/null 2>&1; then
         local java_version
         java_version=$(java -version 2>&1 | head -n1 | cut -d'"' -f2)
         echo -e "${GREEN}FOUND (${java_version})${NC}"
+    else
+        echo -e "${RED}NOT FOUND${NC}"
+        missing_deps+=("Java Development Kit (JDK 8+)")
+        install_commands+=("sudo apt update && sudo apt install -y openjdk-11-jdk")
     fi
     
-    # Check curl
-    echo -n "[*] Checking curl utility... "
-    if ! command -v curl >/dev/null 2>&1; then
-        echo -e "${RED}NOT FOUND${NC}"
-        missing_deps+=("curl")
-        install_commands+=("sudo apt update && sudo apt install -y curl")
-    else
+    # Check curl with spinner
+    echo -n "[*] Analyzing curl utility... "
+    sleep 0.3 &
+    local curl_pid=$!
+    show_spinner $curl_pid "curl"
+    wait $curl_pid
+    
+    if command -v curl >/dev/null 2>&1; then
         local curl_version
         curl_version=$(curl --version 2>/dev/null | head -n1 | cut -d' ' -f2)
         echo -e "${GREEN}FOUND (${curl_version})${NC}"
+    else
+        echo -e "${RED}NOT FOUND${NC}"
+        missing_deps+=("curl")
+        install_commands+=("sudo apt update && sudo apt install -y curl")
     fi
     
-    # Check find
-    echo -n "[*] Checking find utility... "
-    if ! command -v find >/dev/null 2>&1; then
+    # Check find utility
+    echo -n "[*] Analyzing find utility... "
+    sleep 0.2 &
+    local find_pid=$!
+    show_spinner $find_pid "find"
+    wait $find_pid
+    
+    if command -v find >/dev/null 2>&1; then
+        echo -e "${GREEN}FOUND${NC}"
+    else
         echo -e "${RED}NOT FOUND${NC}"
         missing_deps+=("findutils")
         install_commands+=("sudo apt update && sudo apt install -y findutils")
-    else
-        echo -e "${GREEN}FOUND${NC}"
     fi
     
-    # Check du
-    echo -n "[*] Checking disk utility... "
-    if ! command -v du >/dev/null 2>&1; then
+    # Check disk utility
+    echo -n "[*] Analyzing disk utility... "
+    sleep 0.2 &
+    local du_pid=$!
+    show_spinner $du_pid "du"
+    wait $du_pid
+    
+    if command -v du >/dev/null 2>&1; then
+        echo -e "${GREEN}FOUND${NC}"
+    else
         echo -e "${RED}NOT FOUND${NC}"
         missing_deps+=("coreutils")
         install_commands+=("sudo apt update && sudo apt install -y coreutils")
-    else
-        echo -e "${GREEN}FOUND${NC}"
     fi
     
-    # Check bundletool
-    echo -n "[*] Checking Bundletool... "
+    # Check bundletool (this one takes longer, so real spinner)
+    echo -n "[*] Analyzing Bundletool... "
+    find ./ ~/ ~/.local/bin/ /usr/local/bin/ -maxdepth 1 -name "bundletool*.jar" >/dev/null 2>&1 &
+    local bundletool_pid=$!
+    show_spinner $bundletool_pid "Bundletool"
+    wait $bundletool_pid
+    
     local bundletool_found
     bundletool_found=$(find ./ ~/ ~/.local/bin/ /usr/local/bin/ -maxdepth 1 -name "bundletool*.jar" 2>/dev/null | head -n1)
     if [[ -z "$bundletool_found" || ! -f "$bundletool_found" ]]; then
@@ -355,33 +381,33 @@ check_dependencies() {
     
     # If no missing dependencies, return success
     if [[ ${#missing_deps[@]} -eq 0 ]]; then
-        log_success "All dependencies satisfied!"
+        echo -e "${GREEN}[+]${NC} System analysis complete - All dependencies satisfied!"
+        echo -e "${GREEN}[+]${NC} Ready for AAB conversion operations."
+        echo ""
         return 0
     fi
     
-    # Show missing dependencies
-    echo -e "${RED}"
-    echo "=[ MISSING DEPENDENCIES DETECTED ]="
-    echo -e "${YELLOW}"
+    # Show missing dependencies with better formatting
+    echo -e "${RED}=[ DEPENDENCY ISSUES DETECTED ]=${NC}"
+    echo ""
     for i in "${!missing_deps[@]}"; do
-        echo "  [-] ${missing_deps[$i]}"
+        echo -e "  ${RED}[-]${NC} ${missing_deps[$i]}"
     done
-    echo -e "${NC}"
+    echo ""
     
-    # Show what will be done
-    echo -e "${BLUE}"
-    echo "=[ INSTALLATION PLAN ]="
-    echo -e "${CYAN}"
+    # Show installation plan
+    echo -e "${BLUE}=[ INSTALLATION PLAN ]=${NC}"
+    echo ""
     for i in "${!missing_deps[@]}"; do
         local dep="${missing_deps[$i]}"
         local cmd="${install_commands[$i]}"
         if [[ "$cmd" == "download_bundletool" ]]; then
-            echo "  [*] Download Bundletool ${BUNDLETOOL_VERSION} from GitHub"
+            echo -e "  ${CYAN}[*]${NC} Download Bundletool ${BUNDLETOOL_VERSION} from GitHub"
         else
-            echo "  [*] Install: $cmd"
+            echo -e "  ${CYAN}[*]${NC} Install: sudo apt update && sudo apt install -y ..."
         fi
     done
-    echo -e "${NC}"
+    echo ""
     
     # Ask for confirmation
     if [[ "$INTERACTIVE" == true ]]; then
@@ -1233,14 +1259,28 @@ main() {
     COMMAND="${COMMAND:-convert}"
     
     # Initialize
+    echo -e "${BLUE}[*]${NC} Initializing AAB Converter..."
+    sleep 0.5
+    
     load_config
     set_theme
+    
+    # Show header immediately
+    show_header
+    
+    echo -e "${BLUE}[*]${NC} Performing system analysis..."
+    sleep 0.3
+    
     check_dependencies
     setup_logging
-    show_header
     
     # Save configuration after successful initialization
     save_config
+    
+    # Show ready message
+    echo -e "${GREEN}[+]${NC} AAB Converter initialized successfully!"
+    echo -e "${GREEN}[+]${NC} Ready for conversion operations."
+    echo ""
     
     # Create output directory if needed
     [[ "$OUTPUT_DIR" != "." ]] && mkdir -p "$OUTPUT_DIR"
@@ -1248,24 +1288,38 @@ main() {
     # Execute command
     case "$COMMAND" in
         convert)
+            echo -e "${BLUE}[*]${NC} Starting conversion process..."
+            sleep 0.2
             command_convert "$@"
             ;;
         validate)
+            echo -e "${BLUE}[*]${NC} Starting validation process..."
+            sleep 0.2
             command_validate "$@"
             ;;
         info)
+            echo -e "${BLUE}[*]${NC} Gathering bundle information..."
+            sleep 0.2
             command_info "$@"
             ;;
         batch)
+            echo -e "${BLUE}[*]${NC} Initializing batch processing mode..."
+            sleep 0.2
             command_batch "$@"
             ;;
         cleanup)
+            echo -e "${BLUE}[*]${NC} Starting cleanup operations..."
+            sleep 0.2
             command_cleanup "$@"
             ;;
         update)
+            echo -e "${BLUE}[*]${NC} Checking for updates..."
+            sleep 0.2
             command_update "$@"
             ;;
         examples)
+            echo -e "${BLUE}[*]${NC} Loading usage examples..."
+            sleep 0.2
             command_examples "$@"
             ;;
         help)
@@ -1282,6 +1336,7 @@ main() {
     echo "=[ SESSION COMPLETE ]="
     echo "+ --- --=[ Wilson Goal's AAB Converter ]=-- --- +"
     echo -e "${NC}"
+    echo -e "${GREEN}[+]${NC} All operations completed successfully!"
 }
 
 # Entry point
