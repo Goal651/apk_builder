@@ -103,7 +103,7 @@ EXAMPLES:
 
 REQUIREMENTS:
     - Ubuntu/Debian-based Linux distribution
-    - Java Runtime Environment (JRE 8+)
+    - Java Development Kit (JDK 8+)
     - curl, findutils, coreutils
     - Internet connection for bundletool download
 
@@ -128,8 +128,8 @@ check_dependencies() {
     echo -n "  • Java Runtime Environment... "
     if ! command -v java >/dev/null 2>&1; then
         echo -e "${RED}❌ Missing${NC}"
-        missing_deps+=("Java Runtime Environment (JRE 8+)")
-        install_commands+=("sudo apt update && sudo apt install -y openjdk-11-jre")
+        missing_deps+=("Java Development Kit (JDK 8+)")
+        install_commands+=("sudo apt update && sudo apt install -y openjdk-11-jdk")
     else
         local java_version
         java_version=$(java -version 2>&1 | head -n1 | cut -d'"' -f2)
@@ -347,7 +347,6 @@ locate_bundletool() {
     for path in "${search_paths[@]}"; do
         found_path=$(find "${path}" -maxdepth 1 -name "bundletool*.jar" 2>/dev/null | head -n 1)
         if [[ -n "${found_path}" ]]; then
-            log_info "🔍 Found bundletool at: ${found_path}"
             echo "${found_path}"
             return 0
         fi
@@ -356,6 +355,65 @@ locate_bundletool() {
     log_warning "🔍 Bundletool not found in common locations, downloading..."
     download_bundletool
     echo "${DEFAULT_BUNDLETOOL}"
+}
+
+create_keystore() {
+    local ks_path="$1"
+    local ks_alias="$2"
+    local ks_pass="$3"
+    
+    if [[ -f "$ks_path" ]]; then
+        log_info "🔑 Keystore already exists: $ks_path"
+        return 0
+    fi
+    
+    log_info "🔐 Creating keystore: $ks_path"
+    
+    # Ensure keystore directory exists
+    local ks_dir
+    ks_dir=$(dirname "$ks_path")
+    if [[ ! -d "$ks_dir" ]]; then
+        if ! mkdir -p "$ks_dir" 2>/dev/null; then
+            log_error "❌ Cannot create keystore directory: $ks_dir"
+            return 1
+        fi
+    fi
+    
+    # Default dname
+    local dname="CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown"
+    
+    if [[ "$INTERACTIVE" == true ]]; then
+        echo -e "${YELLOW}${BOLD}📝 Let's create a signing certificate for your app. These details help identify your app.${NC}"
+        echo -e "${BLUE}You can press Enter to use default values.${NC}"
+        echo ""
+        
+        read -p "Your name or company name [Unknown]: " cn
+        cn="${cn:-Unknown}"
+        
+        read -p "Department or team name [Unknown]: " ou
+        ou="${ou:-Unknown}"
+        
+        read -p "Company or organization name [Unknown]: " o
+        o="${o:-Unknown}"
+        
+        read -p "City or locality [Unknown]: " l
+        l="${l:-Unknown}"
+        
+        read -p "State or province [Unknown]: " st
+        st="${st:-Unknown}"
+        
+        read -p "Country code (2 letters, e.g., US, GB) [Unknown]: " c
+        c="${c:-Unknown}"
+        
+        dname="CN=$cn, OU=$ou, O=$o, L=$l, ST=$st, C=$c"
+    fi
+    
+    if ! keytool -genkeypair -v -keystore "$ks_path" -alias "$ks_alias" -keyalg RSA -keysize 2048 -validity 10000 -storepass "$ks_pass" -keypass "$ks_pass" -dname "$dname" 2>&1; then
+        log_error "❌ Failed to create keystore"
+        return 1
+    fi
+    
+    log_success "✅ Keystore created successfully"
 }
 
 # ========== AAB OPERATIONS ========== #
@@ -424,12 +482,28 @@ convert_aab() {
     
     local app_name
     if [[ "$INTERACTIVE" == true ]]; then
-        app_name=$(get_app_name)
+        while true; do
+            echo -e "${YELLOW}${BOLD}💡 Enter app name (without spaces/special chars): ${NC}"
+            read -r app_name
+        
+            if [[ -z "${app_name}" ]]; then
+                log_warning "App name cannot be empty"
+            elif [[ ! "${app_name}" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+                log_warning "Invalid characters. Use only letters, numbers, underscores or hyphens"
+            else
+                break
+            fi
+        done
     else
         app_name="${aab_file%.*}"
     fi
     
     local output_name="${OUTPUT_DIR}/${app_name}.apks"
+    
+    # Ensure keystore exists
+    if ! create_keystore "$KEYSTORE_PATH" "$KEYSTORE_ALIAS" "$KEYSTORE_PASS"; then
+        return 1
+    fi
     
     log_info "🔄 Converting to ${output_name}..."
     
@@ -460,26 +534,11 @@ convert_aab() {
     return 0
 }
 
-get_app_name() {
-    while true; do
-        echo -e "${YELLOW}${BOLD}💡 Enter app name (without spaces/special chars): ${NC}"
-        read -r app_name
-        
-        if [[ -z "${app_name}" ]]; then
-            log_warning "App name cannot be empty"
-        elif [[ ! "${app_name}" =~ ^[a-zA-Z0-9_-]+$ ]]; then
-            log_warning "Invalid characters. Use only letters, numbers, underscores or hyphens"
-        else
-            echo "${app_name}"
-            break
-        fi
-    done
-}
-
 # ========== MAIN COMMANDS ========== #
 command_convert() {
     local bundletool_path
     bundletool_path=$(locate_bundletool)
+    log_info "🔍 Found bundletool at: ${bundletool_path}"
     
     log_info "🔍 Checking AAB files..."
     local aab_files=(*.aab)
@@ -516,6 +575,7 @@ command_convert() {
 command_validate() {
     local bundletool_path
     bundletool_path=$(locate_bundletool)
+    log_info "🔍 Found bundletool at: ${bundletool_path}"
     
     log_info "🔍 Checking AAB files for validation..."
     local aab_files=(*.aab)
@@ -545,6 +605,7 @@ command_validate() {
 command_info() {
     local bundletool_path
     bundletool_path=$(locate_bundletool)
+    log_info "🔍 Found bundletool at: ${bundletool_path}"
     
     log_info "📋 Showing AAB information..."
     local aab_files=(*.aab)
