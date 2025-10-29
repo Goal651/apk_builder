@@ -2,3 +2,4 @@ bundletool*
 *.aab
 *.keystore
 *.apks
+my-release-key.keystore
