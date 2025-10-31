@@ -1148,6 +1148,10 @@ command_examples() {
 
 # ========== MAIN ========== #
 main() {
+    set_theme
+    load_config
+    
+    
     # Parse command line arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -1257,13 +1261,11 @@ main() {
     
     # Set default command
     COMMAND="${COMMAND:-convert}"
-    
+
     # Initialize
     echo -e "${BLUE}[*]${NC} Initializing AAB Converter..."
     sleep 0.5
-    
-    load_config
-    set_theme
+
     
     # Show header immediately
     show_header
