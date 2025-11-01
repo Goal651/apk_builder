@@ -302,6 +302,28 @@ command_validate() {
     if [[ ${#aab_files[@]} -eq 0 ]]; then
         log_error "🚫 No AAB files found in current directory"
         log_error "💡 Please place .aab files in $(pwd) and try again"
+        exit 1          
+    fi
+    
+    log_info "📁 Found ${#aab_files[@]} AAB file(s):"
+    if [[ ${#aab_files[@]} -gt 0 ]]; then
+        echo -e "${BLUE}"
+        ls -lh "${aab_files[@]}"
+        echo -e "${NC}"
+    fi
+    
+    local failed_count=0
+    for aab_file in "${aab_files[@]}"; do
+        [[ -f "${aab_file}" ]] || continue
+        if ! validate_aab "${aab_file}" "${bundletool_path}"; then
+            ((failed_count++))
+        fi
+    done
+    
+    if [[ $failed_count -eq 0 ]]; then
+        log_success "🎊 All validations passed successfully!"
+    else
+        log_warning "⚠️  Completed with $failed_count error(s)"
         exit 1
     fi
 }
