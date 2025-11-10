@@ -111,3 +111,13 @@ locate_bundletool() {
     download_bundletool
     echo "${DEFAULT_BUNDLETOOL}"
 }
+
+
+command_update() {
+    echo -e "${GREEN}"
+    echo "=[ BUNDLETOOL UPDATE ]="
+    echo "+ --- --=[ Check for Updates ]=-- --- +"
+    echo -e "${NC}"
+    
+    check_bundletool_updates
+}
