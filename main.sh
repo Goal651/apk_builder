@@ -8,17 +8,17 @@ set -o nounset  # Exit on unset variables
 set -o pipefail # Catch pipe fails
 shopt -s nullglob # Ensure globs expand to empty array when no matches
 
-source 'aab.sh'
-source 'bundle_tool.sh'
-source 'config.sh'
-source 'constant.sh'
-source 'error.sh'
-source 'help.sh'
-source 'keystore.sh'
-source 'logger.sh'
-source 'theme.sh'
-source 'ui.sh'
-source 'utils.sh'
+source './src/aab.sh'
+source './src/bundle_tool.sh'
+source './src/config.sh'
+source './src/constant.sh'
+source './src/error.sh'
+source './src/help.sh'
+source './src/keystore.sh'
+source './src/logger.sh'
+source './src/theme.sh'
+source './src/ui.sh'
+source './src/utils.sh'
 
 
 
