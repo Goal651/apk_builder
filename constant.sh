@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 # ========== CONSTANTS ========== #
 readonly VERSION="1.0.1"
 readonly BUNDLETOOL_VERSION="1.18.2"

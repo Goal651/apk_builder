@@ -1,6 +1,3 @@
-#!/usr/bin/env bash
-
-# ========== KEYSTORE ========== #
 create_keystore() {
     local ks_path="$1"
     local ks_alias="$2"
@@ -79,6 +76,8 @@ create_keystore() {
     # Validate the newly created keystore
     validate_keystore "$ks_path" "$ks_alias" "$ks_pass"
 }
+
+
 
 validate_keystore() {
     local ks_path="$1"

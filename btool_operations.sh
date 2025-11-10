@@ -1,45 +1,3 @@
-#!/usr/bin/env bash
-
-# ========== BUNDLETOOL ========== #
-download_bundletool() {
-    log_info "Downloading bundletool ${BUNDLETOOL_VERSION}..."
-    
-    # Start download with progress
-    echo -n "[*] Downloading... "
-    
-    if curl -L -o "${DEFAULT_BUNDLETOOL}" "${BUNDLETOOL_URL}" 2>/dev/null; then
-        local file_size
-        file_size=$(du -sh "${DEFAULT_BUNDLETOOL}" | cut -f1)
-        echo -e "${GREEN}DONE${NC}"
-        log_success "Download completed (${file_size})"
-        log_debug "Location: $(pwd)/${DEFAULT_BUNDLETOOL}"
-    else
-        echo -e "${RED}FAILED${NC}"
-        log_error "Failed to download bundletool!"
-        log_error "URL: ${BUNDLETOOL_URL}"
-        exit 1
-    fi
-}
-
-locate_bundletool() {
-    local found_path
-    # First check current directory and common locations
-    local search_paths=("./" "~/" "~/.local/bin/" "/usr/local/bin/")
-    
-    for path in "${search_paths[@]}"; do
-        found_path=$(find "${path}" -maxdepth 1 -name "bundletool*.jar" 2>/dev/null | head -n 1)
-        if [[ -n "${found_path}" ]]; then
-            echo "${found_path}"
-            return 0
-        fi
-    done
-    
-    log_warning "🔍 Bundletool not found in common locations, downloading..."
-    download_bundletool
-    echo "${DEFAULT_BUNDLETOOL}"
-}
-
-# ========== SELF-UPDATE ========== #
 check_bundletool_updates() {
     log_info "Checking for bundletool updates..."
     
@@ -77,6 +35,7 @@ check_bundletool_updates() {
     fi
 }
 
+
 update_bundletool() {
     local new_version="$1"
     log_info "Updating bundletool to version $new_version..."
@@ -113,4 +72,42 @@ update_bundletool() {
         fi
         return 1
     fi
+}
+
+download_bundletool() {
+    log_info "Downloading bundletool ${BUNDLETOOL_VERSION}..."
+    
+    # Start download with progress
+    echo -n "[*] Downloading... "
+    
+    if curl -L -o "${DEFAULT_BUNDLETOOL}" "${BUNDLETOOL_URL}" 2>/dev/null; then
+        local file_size
+        file_size=$(du -sh "${DEFAULT_BUNDLETOOL}" | cut -f1)
+        echo -e "${GREEN}DONE${NC}"
+        log_success "Download completed (${file_size})"
+        log_debug "Location: $(pwd)/${DEFAULT_BUNDLETOOL}"
+    else
+        echo -e "${RED}FAILED${NC}"
+        log_error "Failed to download bundletool!"
+        log_error "URL: ${BUNDLETOOL_URL}"
+        exit 1
+    fi
+}
+
+locate_bundletool() {
+    local found_path
+    # First check current directory and common locations
+    local search_paths=("./" "~/" "~/.local/bin/" "/usr/local/bin/")
+    
+    for path in "${search_paths[@]}"; do
+        found_path=$(find "${path}" -maxdepth 1 -name "bundletool*.jar" 2>/dev/null | head -n 1)
+        if [[ -n "${found_path}" ]]; then
+            echo "${found_path}"
+            return 0
+        fi
+    done
+    
+    log_warning "🔍 Bundletool not found in common locations, downloading..."
+    download_bundletool
+    echo "${DEFAULT_BUNDLETOOL}"
 }

@@ -3,79 +3,20 @@
 # Created by Wilson Goal
 # Version 2.0 - 2025
 # Optimized for Ubuntu/Debian-based Linux distributions
-
 set -o errexit  # Exit on error
 set -o nounset  # Exit on unset variables
 set -o pipefail # Catch pipe fails
 shopt -s nullglob # Ensure globs expand to empty array when no matches
 
-# ========== CONSTANTS ========== #
-readonly VERSION="1.0.1"
-readonly BUNDLETOOL_VERSION="1.18.2"
-readonly BUNDLETOOL_URL="https://github.com/google/bundletool/releases/download/${BUNDLETOOL_VERSION}/bundletool-all-${BUNDLETOOL_VERSION}.jar"
-readonly DEFAULT_BUNDLETOOL="./bundletool-all-${BUNDLETOOL_VERSION}.jar"
+source './aab_func.sh'
+source './btool_operations.sh'
+source './constant.sh'
+source './functions.sh'
+source './header_temp.sh'
+source './help.sh'
+source './keystore.sh'
+source './theme.sh'
 
-# ========== DEFAULT CONFIG ========== #
-VERBOSE=true
-INTERACTIVE=true
-OUTPUT_DIR="."
-KEYSTORE_PATH="my-release-key.keystore"
-KEYSTORE_ALIAS="my-key-alias"
-KEYSTORE_PASS="123456"
-BUILD_MODE="universal"
-LOG_FILE=""
-SECURE_INPUT=false
-THEME="msf"
-
-# ========== COLOR THEMES ========== #
-set_theme() {
-    case "$THEME" in
-        "msf")
-            # Default MSF colors
-            readonly RED='\033[0;31m'
-            readonly GREEN='\033[0;32m'
-            readonly YELLOW='\033[1;33m'
-            readonly BLUE='\033[0;34m'
-            readonly MAGENTA='\033[0;35m'
-            readonly CYAN='\033[0;36m'
-            ;;
-        "dark")
-            # Dark theme
-            readonly RED='\033[0;31m'
-            readonly GREEN='\033[0;32m'
-            readonly YELLOW='\033[0;33m'
-            readonly BLUE='\033[0;34m'
-            readonly MAGENTA='\033[0;35m'
-            readonly CYAN='\033[0;36m'
-            ;;
-        "light")
-            # Light theme
-            readonly RED='\033[1;31m'
-            readonly GREEN='\033[1;32m'
-            readonly YELLOW='\033[1;33m'
-            readonly BLUE='\033[1;34m'
-            readonly MAGENTA='\033[1;35m'
-            readonly CYAN='\033[1;36m'
-            ;;
-        "minimal")
-            # Minimal colors
-            readonly RED='\033[31m'
-            readonly GREEN='\033[32m'
-            readonly YELLOW='\033[33m'
-            readonly BLUE='\033[34m'
-            readonly MAGENTA='\033[35m'
-            readonly CYAN='\033[36m'
-            ;;
-        *)
-            log_warning "Unknown theme '$THEME', using default MSF theme"
-            THEME="msf"
-            set_theme
-            ;;
-    esac
-    
-    readonly BOLD='\033[1m'
-    readonly NC='\033[0m' # No Color
-}
 
 # ========== LOGGING ========== #
 log_info() {
@@ -99,164 +40,11 @@ log_debug() {
 }
 
 # ========== HEADER & HELP ========== #
-show_header() {
-    echo -e "${RED}"
-    echo "╔══════════════════════════════════════════════════════════════════════════════╗"
-    echo "║                                                                              ║"
-    echo "║                    █████╗  █████╗ ██████╗     ████████╗ ██████╗              ║"
-    echo "║                   ██╔══██╗██╔══██╗██╔══██╗    ╚══██╔══╝██╔═══██╗             ║"
-    echo "║                   ███████║███████║██████╔╝       ██║   ██║   ██║             ║"
-    echo "║                   ██╔══██║██╔══██║██╔══██╗       ██║   ██║   ██║             ║"
-    echo "║                   ██║  ██║██║  ██║██████╔╝       ██║   ╚██████╔╝             ║"
-    echo "║                   ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝        ╚═╝    ╚═════╝              ║"
-    echo "║                                                                              ║"
-    echo "║                 ██████╗ ██████╗ ███╗   ██╗██╗   ██╗███████╗██████╗ ████████╗ ║"
-    echo "║                ██╔════╝██╔═══██╗████╗  ██║██║   ██║██╔════╝██╔══██╗╚══██╔══╝ ║"
-    echo "║                ██║     ██║   ██║██╔██╗ ██║██║   ██║█████╗  ██████╔╝   ██║    ║"
-    echo "║                ██║     ██║   ██║██║╚██╗██║╚██╗ ██╔╝██╔══╝  ██╔══██╗   ██║    ║"
-    echo "║                ╚██████╗╚██████╔╝██║ ╚████║ ╚████╔╝ ███████╗██║  ██║   ██║    ║"
-    echo "║                 ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝   ╚═╝    ║"
-    echo "║                                                                              ║"
-    echo "║                          LINUX CLI EDITION v${VERSION}                           ║"
-    echo "║                                                                              ║"
-    echo "╚══════════════════════════════════════════════════════════════════════════════╝"
-    echo -e "${NC}"
-    echo -e "${GREEN}                 =[ Wilson Goal's AAB to APKS Converter ]=${NC}"
-    echo -e "${GREEN}                 + --- --=[ Ubuntu/Debian Optimized ]=-- --- +${NC}"
-    echo -e "${GREEN}                 + --- --=[ Auto-deps • Interactive ]=-- --- +${NC}"
-    echo -e "${GREEN}                 + --- --=[ Feature-rich • User-friendly ]=-- --- +${NC}"
-    echo ""
-}
-
-show_help() {
-    cat << 'EOF'
-Usage: builder.sh [OPTIONS] [COMMAND]
-
-Linux-optimized AAB to APKS converter with automatic dependency management.
-
-COMMANDS:
-    convert     Convert AAB files to APKs (default)
-    validate    Validate AAB bundle integrity
-    info        Show AAB file information
-    batch       Batch process multiple files with queue management
-    cleanup     Remove temporary and generated files
-    update      Check for and update bundletool
-    examples    Show usage examples
-
-OPTIONS:
-    -h, --help              Show this help message
-    -v, --verbose           Enable verbose output (default)
-    --quiet                 Disable verbose output
-    -i, --interactive       Interactive mode (default)
-    -n, --non-interactive   Non-interactive mode
-    -o, --output DIR        Output directory (default: current)
-    -k, --keystore PATH     Keystore file path
-    -a, --alias ALIAS       Keystore alias
-    -p, --password PASS     Keystore password
-    --secure                Use secure (hidden) password input
-    --theme THEME           Color theme: msf, dark, light, minimal (default: msf)
-    -m, --mode MODE         Build mode: universal, system, persistent (default: universal)
-    -l, --log FILE          Log output to file
-    -V, --version           Show version information
-
-EXAMPLES:
-    builder.sh                             # Interactive conversion (verbose)
-    builder.sh --quiet                     # Silent conversion
-    builder.sh --non-interactive           # Batch conversion
-    builder.sh --output ./apks --verbose   # Verbose with custom output
-    builder.sh validate                    # Validate bundles
-    builder.sh info                        # Show bundle info
-
-REQUIREMENTS:
-    - Ubuntu/Debian-based Linux distribution
-    - Java Development Kit (JDK 8+)
-    - curl, findutils, coreutils
-    - Internet connection for bundletool download
-
-Created by Wilson Goal - 2025
-EOF
-}
 
 show_version() {
     echo "Wilson Goal's AAB Converter v${VERSION}"
     echo "Bundletool version: ${BUNDLETOOL_VERSION}"
     echo "Optimized for Ubuntu/Debian Linux distributions"
-}
-
-# ========== SELF-UPDATE ========== #
-check_bundletool_updates() {
-    log_info "Checking for bundletool updates..."
-    
-    # Get latest version from GitHub
-    local latest_version
-    latest_version=$(curl -s "https://api.github.com/repos/google/bundletool/releases/latest" | grep '"tag_name"' | cut -d'"' -f4)
-    
-    if [[ -z "$latest_version" ]]; then
-        log_warning "Could not check for updates"
-        return 1
-    fi
-    
-    # Remove 'v' prefix if present
-    latest_version="${latest_version#v}"
-    
-    if [[ "$latest_version" != "$BUNDLETOOL_VERSION" ]]; then
-        log_info "New bundletool version available: $latest_version (current: $BUNDLETOOL_VERSION)"
-        
-        if [[ "$INTERACTIVE" == true ]]; then
-            echo -n "[?] Would you like to update bundletool? [y/N]: "
-            read -r update_choice
-            case "$update_choice" in
-                [yY]|[yY][eE][sS])
-                    update_bundletool "$latest_version"
-                    ;;
-                *)
-                    log_info "Update cancelled"
-                    ;;
-            esac
-        else
-            log_info "Run with --interactive to update bundletool"
-        fi
-    else
-        log_success "Bundletool is up to date ($BUNDLETOOL_VERSION)"
-    fi
-}
-
-update_bundletool() {
-    local new_version="$1"
-    log_info "Updating bundletool to version $new_version..."
-    
-    # Backup current version
-    if [[ -f "$DEFAULT_BUNDLETOOL" ]]; then
-        mv "$DEFAULT_BUNDLETOOL" "${DEFAULT_BUNDLETOOL}.backup"
-        log_info "Backed up current version"
-    fi
-    
-    # Update constants for new version
-    BUNDLETOOL_VERSION="$new_version"
-    BUNDLETOOL_URL="https://github.com/google/bundletool/releases/download/${BUNDLETOOL_VERSION}/bundletool-all-${BUNDLETOOL_VERSION}.jar"
-    DEFAULT_BUNDLETOOL="./bundletool-all-${BUNDLETOOL_VERSION}.jar"
-    
-    # Download new version
-    if download_bundletool; then
-        log_success "Bundletool updated successfully to $new_version"
-        
-        # Remove backup
-        if [[ -f "${DEFAULT_BUNDLETOOL}.backup" ]]; then
-            rm -f "${DEFAULT_BUNDLETOOL}.backup"
-            log_info "Removed backup file"
-        fi
-        
-        # Update config with new version
-        save_config
-    else
-        log_error "Failed to update bundletool"
-        # Restore backup
-        if [[ -f "${DEFAULT_BUNDLETOOL}.backup" ]]; then
-            mv "${DEFAULT_BUNDLETOOL}.backup" "$DEFAULT_BUNDLETOOL"
-            log_info "Restored backup version"
-        fi
-        return 1
-    fi
 }
 
 # ========== PROGRESS BAR ========== #
@@ -520,141 +308,10 @@ setup_logging() {
 }
 
 # ========== BUNDLETOOL ========== #
-download_bundletool() {
-    log_info "Downloading bundletool ${BUNDLETOOL_VERSION}..."
-    
-    # Start download with progress
-    echo -n "[*] Downloading... "
-    
-    if curl -L -o "${DEFAULT_BUNDLETOOL}" "${BUNDLETOOL_URL}" 2>/dev/null; then
-        local file_size
-        file_size=$(du -sh "${DEFAULT_BUNDLETOOL}" | cut -f1)
-        echo -e "${GREEN}DONE${NC}"
-        log_success "Download completed (${file_size})"
-        log_debug "Location: $(pwd)/${DEFAULT_BUNDLETOOL}"
-    else
-        echo -e "${RED}FAILED${NC}"
-        log_error "Failed to download bundletool!"
-        log_error "URL: ${BUNDLETOOL_URL}"
-        exit 1
-    fi
-}
 
-locate_bundletool() {
-    local found_path
-    # First check current directory and common locations
-    local search_paths=("./" "~/" "~/.local/bin/" "/usr/local/bin/")
-    
-    for path in "${search_paths[@]}"; do
-        found_path=$(find "${path}" -maxdepth 1 -name "bundletool*.jar" 2>/dev/null | head -n 1)
-        if [[ -n "${found_path}" ]]; then
-            echo "${found_path}"
-            return 0
-        fi
-    done
-    
-    log_warning "🔍 Bundletool not found in common locations, downloading..."
-    download_bundletool
-    echo "${DEFAULT_BUNDLETOOL}"
-}
 
-create_keystore() {
-    local ks_path="$1"
-    local ks_alias="$2"
-    local ks_pass="$3"
-    
-    if [[ -f "$ks_path" ]]; then
-        log_info "Keystore already exists: $ks_path"
-        # Validate existing keystore
-        if validate_keystore "$ks_path" "$ks_alias" "$ks_pass"; then
-            log_success "Keystore validation passed"
-            return 0
-        else
-            log_warning "Existing keystore is invalid, recreating..."
-        fi
-    fi
-    
-    log_info "Creating keystore: $ks_path"
-    
-    # Ensure keystore directory exists
-    local ks_dir
-    ks_dir=$(dirname "$ks_path")
-    if [[ ! -d "$ks_dir" ]]; then
-        if ! mkdir -p "$ks_dir" 2>/dev/null; then
-            log_error "Cannot create keystore directory: $ks_dir"
-            return 1
-        fi
-    fi
-    
-    # Default dname
-    local dname="CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown"
-    
-    if [[ "$INTERACTIVE" == true ]]; then
-        echo -e "${GREEN}"
-        echo "=[ KEYSTORE CONFIGURATION ]="
-        echo "+ --- --=[ Certificate Information ]=-- --- +"
-        echo -e "${NC}"
-        echo -e "${CYAN}[*] This information will be used to create your app signing certificate${NC}"
-        echo -e "${CYAN}[*] Press Enter to use default values shown in brackets${NC}"
-        echo ""
-        
-        echo -n "[?] Your name or company name [Unknown]: "
-        read -r cn
-        cn="${cn:-Unknown}"
-        
-        echo -n "[?] Department or team name [Unknown]: "
-        read -r ou
-        ou="${ou:-Unknown}"
-        
-        echo -n "[?] Company or organization name [Unknown]: "
-        read -r o
-        o="${o:-Unknown}"
-        
-        echo -n "[?] City or locality [Unknown]: "
-        read -r l
-        l="${l:-Unknown}"
-        
-        echo -n "[?] State or province [Unknown]: "
-        read -r st
-        st="${st:-Unknown}"
-        
-        echo -n "[?] Country code (2 letters, e.g., US, GB) [Unknown]: "
-        read -r c
-        c="${c:-Unknown}"
-        
-        dname="CN=$cn, OU=$ou, O=$o, L=$l, ST=$st, C=$c"
-        echo ""
-        log_info "Certificate details configured"
-    fi
-    
-    if ! keytool -genkeypair -v -keystore "$ks_path" -alias "$ks_alias" -keyalg RSA -keysize 2048 -validity 10000 -storepass "$ks_pass" -keypass "$ks_pass" -dname "$dname" 2>&1; then
-        log_error "Failed to create keystore"
-        return 1
-    fi
-    
-    log_success "Keystore created successfully"
-    # Validate the newly created keystore
-    validate_keystore "$ks_path" "$ks_alias" "$ks_pass"
-}
 
-validate_keystore() {
-    local ks_path="$1"
-    local ks_alias="$2"
-    local ks_pass="$3"
-    
-    if [[ ! -f "$ks_path" ]]; then
-        log_error "Keystore file not found: $ks_path"
-        return 1
-    fi
-    
-    if ! keytool -list -keystore "$ks_path" -storepass "$ks_pass" -alias "$ks_alias" >/dev/null 2>&1; then
-        log_error "Keystore validation failed - invalid keystore, alias, or password"
-        return 1
-    fi
-    
-    log_success "Keystore validation passed"
-    return 0
-}
+
 
 secure_read() {
     local prompt="$1"
@@ -732,131 +389,9 @@ safe_operation() {
 }
 
 # ========== AAB OPERATIONS ========== #
-validate_aab() {
-    local aab_file="$1"
-    local bundletool_path="$2"
-    
-    log_info "🔍 Validating: ${aab_file}"
-    
-    # Check if file exists first
-    if [[ ! -f "${aab_file}" ]]; then
-        log_error "❌ File not found: ${aab_file}"
-        return 1
-    fi
-    
-    # Validate with bundletool and capture output
-    local validation_output
-    validation_output=$(java -jar "${bundletool_path}" validate --bundle="${aab_file}" 2>&1) || {
-        log_error "❌ Validation failed for ${aab_file}"
-        echo -e "${RED}${validation_output}${NC}"
-        return 1
-    }
-    
-    log_success "✅ Valid AAB: ${aab_file}"
-    echo -e "${GREEN}${validation_output}${NC}"
-    return 0
-}
 
-show_aab_info() {
-    local aab_file="$1"
-    local bundletool_path="$2"
-    
-    log_info "📋 Bundle info: ${aab_file}"
-    
-    # Check if file exists first
-    if [[ ! -f "${aab_file}" ]]; then
-        log_error "❌ File not found: ${aab_file}"
-        return 1
-    fi
-    
-    # Get manifest info and handle errors
-    local manifest_output
-    manifest_output=$(java -jar "${bundletool_path}" dump manifest --bundle="${aab_file}" 2>&1) || {
-        log_error "❌ Failed to get manifest info for ${aab_file}"
-        echo -e "${RED}${manifest_output}${NC}"
-        return 1
-    }
-    
-    echo -e "${CYAN}${manifest_output}${NC}" | head -20
-    return 0
-}
 
-convert_aab() {
-    local aab_file="$1"
-    local bundletool_path="$2"
-    
-    log_info "📦 Processing: ${aab_file}"
-    
-    # Check if file exists first
-    if [[ ! -f "${aab_file}" ]]; then
-        log_error "❌ File not found: ${aab_file}"
-        return 1
-    fi
-    
-    log_debug "File size: $(du -sh "${aab_file}" | cut -f1)"
-    
-    local app_name
-    if [[ "$INTERACTIVE" == true ]]; then
-        echo -e "${GREEN}"
-        echo "=[ APP CONFIGURATION ]="
-        echo "+ --- --=[ Output Settings ]=-- --- +"
-        echo -e "${NC}"
-        
-        while true; do
-            echo -n "[?] Enter output app name (no spaces/special chars): "
-            read -r app_name
-        
-            if [[ -z "${app_name}" ]]; then
-                log_warning "App name cannot be empty"
-            elif [[ ! "${app_name}" =~ ^[a-zA-Z0-9_-]+$ ]]; then
-                log_warning "Invalid characters. Use only letters, numbers, underscores or hyphens"
-            else
-                log_info "Output name set to: $app_name"
-                break
-            fi
-        done
-    else
-        app_name="${aab_file%.*}"
-    fi
-    
-    local output_name="${OUTPUT_DIR}/${app_name}.apks"
-    
-    # Ensure keystore exists
-    if ! create_keystore "$KEYSTORE_PATH" "$KEYSTORE_ALIAS" "$KEYSTORE_PASS"; then
-        return 1
-    fi
-    
-    log_info "Converting AAB to APKS format..."
-    
-    # Create output directory if needed
-    if [[ "$OUTPUT_DIR" != "." ]] && ! mkdir -p "$OUTPUT_DIR" 2>/dev/null; then
-        log_error "Failed to create output directory: $OUTPUT_DIR"
-        return 1
-    fi
-    
-    echo -n "[*] Processing bundle... "
-    
-    # Convert with bundletool and capture output
-    local conversion_output
-    conversion_output=$(java -jar "${bundletool_path}" build-apks \
-        --bundle="${aab_file}" \
-        --output="${output_name}" \
-        --mode="${BUILD_MODE}" \
-        --ks="${KEYSTORE_PATH}" \
-        --ks-key-alias="${KEYSTORE_ALIAS}" \
-        --ks-pass="pass:${KEYSTORE_PASS}" \
-        --key-pass="pass:${KEYSTORE_PASS}" 2>&1) || {
-        echo -e "${RED}FAILED${NC}"
-        log_error "Conversion failed for ${aab_file}"
-        echo -e "${RED}${conversion_output}${NC}"
-        return 1
-    }
-    
-    echo -e "${GREEN}DONE${NC}"
-    log_success "Created: ${output_name}"
-    log_debug "Output size: $(du -sh "${output_name}" | cut -f1)"
-    return 0
-}
+
 
 command_update() {
     echo -e "${GREEN}"
@@ -1102,49 +637,7 @@ command_cleanup() {
     log_info "Space freed: $(numfmt --to=iec-i --suffix=B $total_size 2>/dev/null || echo "${total_size}B")"
 }
 
-command_examples() {
-    echo -e "${GREEN}"
-    echo "=[ USAGE EXAMPLES ]="
-    echo "+ --- --=[ Practical Usage Guide ]=-- --- +"
-    echo -e "${NC}"
-    
-    echo -e "${CYAN}BASIC USAGE:${NC}"
-    echo -e "  ${GREEN}./builder.sh${NC}                          # Interactive conversion"
-    echo -e "  ${GREEN}./builder.sh --non-interactive${NC}       # Batch conversion"
-    echo -e "  ${GREEN}./builder.sh validate${NC}                 # Validate bundles"
-    echo ""
-    
-    echo -e "${CYAN}CUSTOM CONFIGURATION:${NC}"
-    echo -e "  ${GREEN}./builder.sh -o ./output${NC}              # Custom output directory"
-    echo -e "  ${GREEN}./builder.sh -k mykey.keystore${NC}       # Custom keystore"
-    echo -e "  ${GREEN}./builder.sh -a myalias${NC}               # Custom alias"
-    echo ""
-    
-    echo -e "${CYAN}ADVANCED OPTIONS:${NC}"
-    echo -e "  ${GREEN}./builder.sh --secure${NC}                 # Hidden password input"
-    echo -e "  ${GREEN}./builder.sh -l conversion.log${NC}       # Log to file"
-    echo -e "  ${GREEN}./builder.sh -m system${NC}               # System APKs only"
-    echo ""
-    
-    echo -e "${CYAN}MAINTENANCE:${NC}"
-    echo -e "  ${GREEN}./builder.sh batch${NC}                   # Batch processing mode"
-    echo -e "  ${GREEN}./builder.sh cleanup${NC}                 # Remove generated files"
-    echo -e "  ${GREEN}./builder.sh examples${NC}                # Show this help"
-    echo ""
-    
-    echo -e "${CYAN}WORKFLOW EXAMPLES:${NC}"
-    echo -e "  # Convert all AAB files in current directory"
-    echo -e "  ${GREEN}./builder.sh --non-interactive${NC}"
-    echo ""
-    echo -e "  # Convert with custom settings and logging"
-    echo -e "  ${GREEN}./builder.sh -o ./apks -k release.keystore -l build.log${NC}"
-    echo ""
-    echo -e "  # Batch process with progress tracking"
-    echo -e "  ${GREEN}./builder.sh batch${NC}"
-    echo ""
-    echo -e "  # Clean up after conversion"
-    echo -e "  ${GREEN}./builder.sh cleanup${NC}"
-}
+
 
 # ========== MAIN ========== #
 main() {
@@ -1266,7 +759,7 @@ main() {
     echo -e "${BLUE}[*]${NC} Initializing AAB Converter..."
     sleep 0.5
 
-    
+
     # Show header immediately
     show_header
     
