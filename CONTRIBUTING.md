@@ -82,7 +82,7 @@ pwsh -File main.ps1 -Help
 
 ## 📁 Project Structure
 
-```
+```shell
 apk_builder/
 ├── linux/                  # Linux bash implementation
 │   ├── main.sh            # Main entry point
@@ -174,7 +174,7 @@ Use descriptive branch names:
 
 Follow conventional commit format:
 
-```
+```bash
 type(scope): subject
 
 body (optional)
@@ -194,7 +194,7 @@ footer (optional)
 
 **Examples:**
 
-```
+```bash
 feat(windows): add support for custom themes
 
 fix(linux): resolve bundletool download timeout issue
@@ -480,4 +480,4 @@ Thank you for contributing to AAB Converter Tool! 🎉
 
 ---
 
-**Created with ❤️ by Wilson Goal - 2025**
+## Created with ❤️ by Wilson Goal - 2025
