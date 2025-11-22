@@ -9,10 +9,10 @@
 .PARAMETER Help
     Show help message
 
-.PARAMETER Version
+.PARAMETER ShowVersion
     Show version information
 
-.PARAMETER Verbose
+.PARAMETER VerboseOutput
     Enable verbose output (default: true)
 
 .PARAMETER Quiet
@@ -71,8 +71,8 @@
 
 param(
     [switch]$Help,
-    [switch]$Version,
-    [switch]$Verbose,
+    [switch]$ShowVersion,
+    [switch]$VerboseOutput,
     [switch]$Quiet,
     [switch]$Interactive,
     [switch]$NonInteractive,
@@ -123,13 +123,13 @@ function Main {
         exit 0
     }
     
-    if ($Version) {
+    if ($ShowVersion) {
         Show-Version
         exit 0
     }
     
     # Apply command-line parameters
-    if ($Verbose) { $script:VERBOSE = $true }
+    if ($VerboseOutput) { $script:VERBOSE = $true }
     if ($Quiet) { $script:VERBOSE = $false }
     if ($Interactive) { $script:INTERACTIVE = $true }
     if ($NonInteractive) { $script:INTERACTIVE = $false }

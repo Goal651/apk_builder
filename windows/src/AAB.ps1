@@ -181,11 +181,15 @@ function Invoke-Convert {
     Log-Info "🔍 Found bundletool at: $bundletoolPath"
     
     Log-Info "🔍 Checking AAB files..."
-    $aabFiles = Get-ChildItem -Path "." -Filter "*.aab" -File
+    
+    # Search in current directory and parent directory
+    $aabFiles = @()
+    $aabFiles += Get-ChildItem -Path "." -Filter "*.aab" -File -ErrorAction SilentlyContinue
+    $aabFiles += Get-ChildItem -Path ".." -Filter "*.aab" -File -ErrorAction SilentlyContinue
     
     if ($aabFiles.Count -eq 0) {
-        Log-Error "🚫 No AAB files found in current directory"
-        Log-Error "💡 Please place .aab files in $(Get-Location) and try again"
+        Log-Error "🚫 No AAB files found in current or parent directory"
+        Log-Error "💡 Please place .aab files in $(Get-Location) or parent directory and try again"
         exit 1
     }
     
@@ -220,11 +224,15 @@ function Invoke-Validate {
     Log-Info "🔍 Found bundletool at: $bundletoolPath"
     
     Log-Info "🔍 Checking AAB files for validation..."
-    $aabFiles = Get-ChildItem -Path "." -Filter "*.aab" -File
+    
+    # Search in current directory and parent directory
+    $aabFiles = @()
+    $aabFiles += Get-ChildItem -Path "." -Filter "*.aab" -File -ErrorAction SilentlyContinue
+    $aabFiles += Get-ChildItem -Path ".." -Filter "*.aab" -File -ErrorAction SilentlyContinue
     
     if ($aabFiles.Count -eq 0) {
-        Log-Error "🚫 No AAB files found in current directory"
-        Log-Error "💡 Please place .aab files in $(Get-Location) and try again"
+        Log-Error "🚫 No AAB files found in current or parent directory"
+        Log-Error "💡 Please place .aab files in $(Get-Location) or parent directory and try again"
         exit 1
     }
     
@@ -249,11 +257,15 @@ function Invoke-Info {
     Log-Info "🔍 Found bundletool at: $bundletoolPath"
     
     Log-Info "📋 Showing AAB information..."
-    $aabFiles = Get-ChildItem -Path "." -Filter "*.aab" -File
+    
+    # Search in current directory and parent directory
+    $aabFiles = @()
+    $aabFiles += Get-ChildItem -Path "." -Filter "*.aab" -File -ErrorAction SilentlyContinue
+    $aabFiles += Get-ChildItem -Path ".." -Filter "*.aab" -File -ErrorAction SilentlyContinue
     
     if ($aabFiles.Count -eq 0) {
-        Log-Error "🚫 No AAB files found in current directory"
-        Log-Error "💡 Please place .aab files in $(Get-Location) and try again"
+        Log-Error "🚫 No AAB files found in current or parent directory"
+        Log-Error "💡 Please place .aab files in $(Get-Location) or parent directory and try again"
         exit 1
     }
     
@@ -285,11 +297,15 @@ function Invoke-Batch {
     Log-Info "Found bundletool at: $bundletoolPath"
     
     Log-Info "Scanning for AAB files..."
-    $aabFiles = Get-ChildItem -Path "." -Filter "*.aab" -File
+    
+    # Search in current directory and parent directory
+    $aabFiles = @()
+    $aabFiles += Get-ChildItem -Path "." -Filter "*.aab" -File -ErrorAction SilentlyContinue
+    $aabFiles += Get-ChildItem -Path ".." -Filter "*.aab" -File -ErrorAction SilentlyContinue
     
     if ($aabFiles.Count -eq 0) {
-        Log-Error "No AAB files found in current directory"
-        Log-Error "Place .aab files in $(Get-Location) and try again"
+        Log-Error "No AAB files found in current or parent directory"
+        Log-Error "Place .aab files in $(Get-Location) or parent directory and try again"
         exit 1
     }
     

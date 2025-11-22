@@ -17,7 +17,8 @@ COMMANDS:
 
 OPTIONS:
     -Help               Show this help message
-    -Verbose            Enable verbose output (default)
+    -ShowVersion        Show version information
+    -VerboseOutput      Enable verbose output (default)
     -Quiet              Disable verbose output
     -Interactive        Interactive mode (default)
     -NonInteractive     Non-interactive mode
@@ -29,13 +30,12 @@ OPTIONS:
     -Theme <THEME>      Color theme: msf, dark, light, minimal (default: msf)
     -Mode <MODE>        Build mode: universal, system, persistent (default: universal)
     -Log <FILE>         Log output to file
-    -Version            Show version information
 
 EXAMPLES:
     .\main.ps1                                  # Interactive conversion (verbose)
     .\main.ps1 -Quiet                           # Silent conversion
     .\main.ps1 -NonInteractive                  # Batch conversion
-    .\main.ps1 -Output .\apks -Verbose          # Verbose with custom output
+    .\main.ps1 -Output .\apks -VerboseOutput    # Verbose with custom output
     .\main.ps1 -Command validate                # Validate bundles
     .\main.ps1 -Command info                    # Show bundle info
 
