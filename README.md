@@ -38,6 +38,9 @@ The tool will automatically detect and install:
 - **Bundletool** (Google's AAB conversion tool)
 - **curl** (Linux) or **Invoke-WebRequest** (Windows PowerShell)
 
+> [!TIP]
+> **AAB File Placement**: You can place your `.aab` files either in the script directory (`linux/` or `windows/`) or in the parent directory for convenience. The tool automatically searches both locations.
+
 ## 🛠️ Installation
 
 ### Linux - Quick Start
@@ -448,12 +451,30 @@ The tool includes a default keystore for testing:
 
 ## 🤝 Contributing
 
+We welcome contributions! Whether it's:
+
+- 🐛 Bug fixes
+- ✨ New features
+- 📝 Documentation improvements
+- 🌍 Platform support (macOS, etc.)
+- 🧪 Testing and quality assurance
+
+Please read our [Contributing Guidelines](CONTRIBUTING.md) for details on:
+
+- Development setup
+- Code style guidelines
+- Submitting pull requests
+- Reporting bugs
+- Requesting features
+
+### Quick Start for Contributors
+
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
 3. Make your changes and test thoroughly
-4. Commit your changes: `git commit -m 'Add feature'`
-5. Push to the branch: `git push origin feature-name`
-6. Submit a pull request
+4. Commit: `git commit -m 'feat: add amazing feature'`
+5. Push: `git push origin feature/amazing-feature`
+6. Open a Pull Request
 
 ## 📄 License
 
@@ -463,12 +484,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Google** for the [Bundletool](https://github.com/google/bundletool) utility
 - **Android** community for AAB format support
-- **Ubuntu/Debian** for excellent package management
+- **Ubuntu/Debian** and **Windows** communities for excellent platform support
+- All contributors who help improve this tool
 
 ## 📞 Support
 
 - 🐛 **Bug Reports**: [Create an Issue](https://github.com/yourusername/apk_builder/issues)
 - 💡 **Feature Requests**: [Create an Issue](https://github.com/yourusername/apk_builder/issues)
+- 🤝 **Contributing**: See [CONTRIBUTING.md](CONTRIBUTING.md)
 - 📧 **Email**: <bugiriwilson651@gmail.com>
 
 ## 🔗 Related Links
@@ -476,9 +499,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Android App Bundle Documentation](https://developer.android.com/guide/app-bundle)
 - [Bundletool GitHub Repository](https://github.com/google/bundletool)
 - [Android Studio Releases](https://developer.android.com/studio/releases)
+- [PowerShell Documentation](https://docs.microsoft.com/en-us/powershell/)
 
 ---
 
 ## **Created with ❤️ by Wilson Goal - 2025**
 
 *If this tool helped you, consider giving it a ⭐ on GitHub!*
+
+### Project Stats
+
+![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Version](https://img.shields.io/badge/version-1.0.1-orange)
