@@ -1,6 +1,6 @@
 # 🌟 Wilson Goal's AAB Converter Tool
 
-A powerful, Linux-optimized command-line tool for converting Android App Bundle (.aab) files to APK format with automatic dependency management and user-friendly features.
+A powerful, cross-platform command-line tool for converting Android App Bundle (.aab) files to APK format with automatic dependency management and user-friendly features. Available for both **Linux** and **Windows**.
 
 ## 🚀 Features
 
@@ -8,7 +8,7 @@ A powerful, Linux-optimized command-line tool for converting Android App Bundle 
 - **✅ Bundle Validation** - Verify AAB file integrity before conversion
 - **📋 File Information** - Display detailed AAB bundle metadata
 - **🔧 Auto Dependency Management** - Automatically detect and install missing dependencies
-- **💻 Linux Optimized** - Built specifically for Ubuntu/Debian systems
+- **💻 Cross-Platform** - Works on Linux (Ubuntu/Debian) and Windows (10/11)
 - **🎨 Colored Output** - Beautiful, informative terminal output with emojis
 - **📝 Verbose Logging** - Detailed progress information and error reporting
 - **🔐 Keystore Support** - Custom signing configuration for APK generation
@@ -18,92 +18,174 @@ A powerful, Linux-optimized command-line tool for converting Android App Bundle 
 
 ### System Requirements
 
+#### Linux
+
 - **OS**: Ubuntu/Debian-based Linux distribution
 - **Architecture**: x86_64 or ARM64
+- **Internet**: Required for bundletool download
+
+#### Windows
+
+- **OS**: Windows 10/11
+- **PowerShell**: 5.1 or later (included in Windows 10/11)
 - **Internet**: Required for bundletool download
 
 ### Automatic Dependencies
 
 The tool will automatically detect and install:
 
-- **Java Runtime Environment (JRE 8+)**
-- **curl** (for downloads)
-- **findutils** (file searching)
-- **coreutils** (system utilities)
+- **Java Development Kit (JDK 8+)**
 - **Bundletool** (Google's AAB conversion tool)
+- **curl** (Linux) or **Invoke-WebRequest** (Windows PowerShell)
 
 ## 🛠️ Installation
 
-### Quick Start
+### Linux - Quick Start
 
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/apk_builder.git
-cd apk_builder
+cd apk_builder/linux
 
 # Make the script executable
-chmod +x builder.sh
+chmod +x main.sh
 
 # Run the script (dependencies will be auto-installed)
-./builder.sh
+./main.sh
+```
+
+### Windows - Quick Start
+
+```powershell
+# Clone the repository
+git clone https://github.com/yourusername/apk_builder.git
+cd apk_builder\windows
+
+# Set execution policy (if needed, run PowerShell as Administrator)
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+# Run the script (dependencies will be auto-installed)
+.\main.ps1
 ```
 
 ### Manual Setup
 
+#### Linux
+
 ```bash
 # Download the script
-wget https://raw.githubusercontent.com/yourusername/apk_builder/main/builder.sh
+wget https://raw.githubusercontent.com/yourusername/apk_builder/main/linux/main.sh
 
 # Make executable
-chmod +x builder.sh
+chmod +x main.sh
 
 # Run
-./builder.sh
+./main.sh
+```
+
+#### Windows
+
+```powershell
+# Download the repository as ZIP or clone with git
+# Extract to a folder and navigate to windows directory
+
+# Set execution policy (run PowerShell as Administrator)
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+# Run
+.\main.ps1
 ```
 
 ## 📖 Usage
 
-### Basic Commands
+### Linux - Basic Commands
 
 ```bash
 # Interactive conversion (default)
-./builder.sh
+cd linux
+./main.sh
 
 # Silent conversion (no verbose output)
-./builder.sh --quiet
+./main.sh --quiet
 
 # Batch conversion (non-interactive)
-./builder.sh --non-interactive
+./main.sh --non-interactive
 
 # Custom output directory
-./builder.sh --output ./apks --verbose
+./main.sh --output ./apks --verbose
 
 # Validate AAB files
-./builder.sh validate
+./main.sh validate
 
 # Show AAB file information
-./builder.sh info
+./main.sh info
 
 # Show help
-./builder.sh --help
+./main.sh --help
 
 # Show version
-./builder.sh --version
+./main.sh --version
+```
+
+### Windows - Basic Commands
+
+```powershell
+# Interactive conversion (default)
+cd windows
+.\main.ps1
+
+# Silent conversion (no verbose output)
+.\main.ps1 -Quiet
+
+# Batch conversion (non-interactive)
+.\main.ps1 -NonInteractive
+
+# Custom output directory
+.\main.ps1 -Output .\apks -Verbose
+
+# Validate AAB files
+.\main.ps1 -Command validate
+
+# Show AAB file information
+.\main.ps1 -Command info
+
+# Show help
+.\main.ps1 -Help
+
+# Show version
+.\main.ps1 -Version
 ```
 
 ### Advanced Options
 
+#### Linux
+
 ```bash
 # Custom keystore configuration
-./builder.sh --keystore my-key.keystore --alias my-alias --password mypassword
+./main.sh --keystore my-key.keystore --alias my-alias --password mypassword
 
 # Different build modes
-./builder.sh --mode universal    # Default: single APK for all devices
-./builder.sh --mode system       # System-signed APK
-./builder.sh --mode persistent   # Persistent APK
+./main.sh --mode universal    # Default: single APK for all devices
+./main.sh --mode system       # System-signed APK
+./main.sh --mode persistent   # Persistent APK
 
 # Enable logging to file
-./builder.sh --log conversion.log
+./main.sh --log conversion.log
+```
+
+#### Windows
+
+```powershell
+# Custom keystore configuration
+.\main.ps1 -Keystore my-key.keystore -Alias my-alias -Password mypassword
+
+# Different build modes
+.\main.ps1 -Mode universal    # Default: single APK for all devices
+.\main.ps1 -Mode system       # System-signed APK
+.\main.ps1 -Mode persistent   # Persistent APK
+
+# Enable logging to file
+.\main.ps1 -Log conversion.log
 ```
 
 ## 🎯 Command Reference
@@ -223,12 +305,12 @@ ls *.aab
 
 ## 🐛 Troubleshooting
 
-### Common Issues
+### Linux - Common Issues
 
 #### 1. Permission Denied
 
 ```bash
-chmod +x builder.sh
+chmod +x main.sh
 ```
 
 #### 2. Java Not Found
@@ -256,7 +338,60 @@ wget https://github.com/google/bundletool/releases/download/1.18.2/bundletool-al
 keytool -genkey -v -keystore my-release-key.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
                                                                                     
 # Use custom keystore
-./builder.sh --keystore my-release-key.keystore --alias my-key-alias --password yourpassword
+./main.sh --keystore my-release-key.keystore --alias my-key-alias --password yourpassword
+```
+
+### Windows - Common Issues
+
+#### 1. Execution Policy Error
+
+```powershell
+# Run PowerShell as Administrator and execute:
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+# Or for current session only:
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+```
+
+#### 2. Java Not Found
+
+```powershell
+# Download and install Java JDK from:
+# https://adoptium.net/ (recommended)
+# or https://www.oracle.com/java/technologies/downloads/
+
+# Verify installation
+java -version
+```
+
+#### 3. Bundletool Download Failed
+
+```powershell
+# Check internet connection
+Test-NetConnection github.com -Port 443
+
+# Manual download if needed
+Invoke-WebRequest -Uri "https://github.com/google/bundletool/releases/download/1.18.2/bundletool-all-1.18.2.jar" -OutFile "bundletool-all-1.18.2.jar"
+```
+
+#### 4. Keystore Issues
+
+```powershell
+# Generate a new keystore
+keytool -genkey -v -keystore my-release-key.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
+
+# Use custom keystore
+.\main.ps1 -Keystore my-release-key.keystore -Alias my-key-alias -Password yourpassword
+```
+
+#### 5. Script Not Found or Path Issues
+
+```powershell
+# Make sure you're in the correct directory
+cd path\to\apk_builder\windows
+
+# Run with full path if needed
+& "C:\path\to\apk_builder\windows\main.ps1"
 ```
 
 ### Error Messages
@@ -267,6 +402,7 @@ keytool -genkey -v -keystore my-release-key.keystore -alias my-key-alias -keyalg
 | `❌ Java is required` | Java not installed | Allow auto-install or install manually |
 | `❌ Failed to download bundletool` | Network issues | Check internet connection or download manually |
 | `💥 Conversion failed` | Invalid AAB file | Use `validate` command to check file integrity |
+| `Execution Policy` (Windows) | PowerShell security policy | Run `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` |
 
 ## 📁 File Structure
 
