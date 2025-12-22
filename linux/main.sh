@@ -3,6 +3,7 @@
 # Created by Wilson Goal
 # Version 2.0 - 2025
 # Optimized for Ubuntu/Debian-based Linux distributions
+
 set -o errexit  # Exit on error
 set -o nounset  # Exit on unset variables
 set -o pipefail # Catch pipe fails
@@ -145,7 +146,7 @@ main() {
 
     # Show header immediately
     show_header
-    sleep 5
+    sleep 1
 
     
     echo -e "${BLUE}[*]${NC} Performing system analysis..."

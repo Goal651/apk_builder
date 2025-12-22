@@ -97,15 +97,20 @@ download_bundletool() {
 locate_bundletool() {
     local found_path
     # First check current directory and common locations
-    local search_paths=("./" "~/" "~/.local/bin/" "/usr/local/bin/")
+    local search_paths=("./" "$HOME/" "/usr/local/bin/")
+    local valid_paths=()
     
-    for path in "${search_paths[@]}"; do
-        found_path=$(find "${path}" -maxdepth 1 -name "bundletool*.jar" 2>/dev/null | head -n 1)
+    for p in "${search_paths[@]}"; do
+        [[ -d "$p" ]] && valid_paths+=("$p")
+    done
+
+    if [[ ${#valid_paths[@]} -gt 0 ]]; then
+        found_path=$(find "${valid_paths[@]}" -maxdepth 1 -name "bundletool*.jar" 2>/dev/null | head -n 1)
         if [[ -n "${found_path}" ]]; then
             echo "${found_path}"
             return 0
         fi
-    done
+    fi
     
     log_warning "🔍 Bundletool not found in common locations, downloading..."
     download_bundletool

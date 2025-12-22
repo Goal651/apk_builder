@@ -14,11 +14,10 @@ check_dependencies() {
     local install_commands=()
     
     # Check Java with spinner
-    echo -n "[*] Analyzing Java Development Kit... "
-    # Simulate checking (java -version is fast, but we show spinner for UX)
+    local java_msg="Analyzing Java Development Kit"
     sleep 0.5 &
     local java_pid=$!
-    show_spinner $java_pid "Java JDK"
+    show_spinner $java_pid "$java_msg"
     wait $java_pid
     
     if java -version >/dev/null 2>&1; then
@@ -32,10 +31,10 @@ check_dependencies() {
     fi
     
     # Check curl with spinner
-    echo -n "[*] Analyzing curl utility... "
+    local curl_msg="Analyzing curl utility"
     sleep 0.3 &
     local curl_pid=$!
-    show_spinner $curl_pid "curl"
+    show_spinner $curl_pid "$curl_msg"
     wait $curl_pid
     
     if command -v curl >/dev/null 2>&1; then
@@ -49,10 +48,10 @@ check_dependencies() {
     fi
     
     # Check find utility
-    echo -n "[*] Analyzing find utility... "
+    local find_msg="Analyzing find utility"
     sleep 0.2 &
     local find_pid=$!
-    show_spinner $find_pid "find"
+    show_spinner $find_pid "$find_msg"
     wait $find_pid
     
     if command -v find >/dev/null 2>&1; then
@@ -64,7 +63,7 @@ check_dependencies() {
     fi
     
     # Check disk utility
-    echo -n "[*] Analyzing disk utility... "
+    local du_msg="Analyzing disk utility"
     sleep 0.2 &
     local du_pid=$!
     show_spinner $du_pid "du"
@@ -79,14 +78,21 @@ check_dependencies() {
     fi
     
     # Check bundletool (this one takes longer, so real spinner)
-    echo -n "[*] Analyzing Bundletool... "
-    find ./ ~/ ~/.local/bin/ /usr/local/bin/ -maxdepth 1 -name "bundletool*.jar" >/dev/null 2>&1 &
+    local bt_msg="Analyzing Bundletool"
+    
+    # Filter search paths to avoid find errors on non-existent directories
+    local bt_search=()
+    for p in "./" "$HOME/" "/usr/local/bin/"; do
+        [[ -d "$p" ]] && bt_search+=("$p")
+    done
+    
+    find "${bt_search[@]}" -maxdepth 1 -name "bundletool*.jar" >/dev/null 2>&1 &
     local bundletool_pid=$!
-    show_spinner $bundletool_pid "Bundletool"
+    show_spinner $bundletool_pid "$bt_msg"
     wait $bundletool_pid
     
     local bundletool_found
-    bundletool_found=$(find ./ ~/ ~/.local/bin/ /usr/local/bin/ -maxdepth 1 -name "bundletool*.jar" 2>/dev/null | head -n1)
+    bundletool_found=$(find "${bt_search[@]}" -maxdepth 1 -name "bundletool*.jar" 2>/dev/null | head -n1)
     if [[ -z "$bundletool_found" || ! -f "$bundletool_found" ]]; then
         echo -e "${RED}NOT FOUND${NC}"
         missing_deps+=("Bundletool ${BUNDLETOOL_VERSION}")

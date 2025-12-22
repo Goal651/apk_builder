@@ -130,7 +130,7 @@ command_convert() {
     log_info "🔍 Found bundletool at: ${bundletool_path}"
     
     log_info "🔍 Checking AAB files..."
-    local aab_files=(*.aab)
+    local aab_files=(../*.aab)
     
     if [[ ${#aab_files[@]} -eq 0 ]]; then
         log_error "🚫 No AAB files found in current directory"
