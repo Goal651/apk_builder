@@ -69,6 +69,9 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 # Run the script (dependencies will be auto-installed)
 .\main.ps1
+
+# OR use the Batch wrapper (automatically bypasses execution policy)
+.\main.bat
 ```
 
 ### Manual Setup
@@ -97,6 +100,9 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 # Run
 .\main.ps1
+
+# OR use the Batch wrapper
+.\main.bat
 ```
 
 ## 📖 Usage
@@ -142,6 +148,8 @@ cd windows
 
 # Batch conversion (non-interactive)
 .\main.ps1 -NonInteractive
+# Using main.bat wrapper
+.\main.bat -NonInteractive
 
 # Custom output directory
 .\main.ps1 -Output .\apks -Verbose
@@ -354,6 +362,8 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 # Or for current session only:
 Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+
+# TIP: Using main.bat automatically handles execution policy bypass for you.
 ```
 
 #### 2. Java Not Found
@@ -411,9 +421,13 @@ cd path\to\apk_builder\windows
 
 ```bash
 apk_builder/
-├── builder.sh           # Main script
 ├── README.md           # This documentation
 ├── .gitignore          # Git ignore file
+├── linux/              # Linux CLI files
+│   └── main.sh
+├── windows/            # Windows PowerShell files
+│   ├── main.ps1
+│   └── main.bat        # Batch entry point
 ├── examples/           # Example AAB files (optional)
 └── logs/              # Log files directory (auto-created)
 ```
